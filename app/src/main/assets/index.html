@@ -8,8 +8,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script>
+  if (typeof pdfjsLib !== 'undefined') {
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  </script>
+  }
+</script>
   <script src="https://webrtc-project-k0jx.onrender.com/socket.io/socket.io.js"></script>
   <!-- Custom Stylesheet -->
   <link rel="stylesheet" href="style.css">
@@ -43,8 +45,9 @@
                     <button id="shareBoardOnlyBtn" style="display: none;">Share WhiteBoard Only 🖥️</button>
                   <!--- <button id="shareBtn" style="display: none;">Share Screen 🖥️</button>
                     <button id="youtubeStreamBtn" style="display: none;">Stream YouTube 🎥</button> -->
-                  <div> <button id="muteAllBtn" style="display: none;">Mute All 🎙️❌</button>
-                    <button id="unmuteAllBtn" style="display: none;">Unmute All 🎙️✅</button>
+                  <div style="display: flex; gap: 10px; align-items: center;">
+                    <button id="muteAllBtn">All 🎙️❌</button>
+                    <button id="unmuteAllBtn">All 🎙️✅</button>
                   </div>
                     <button id="masterChatBtn" style="display: none;">Chat Board 💬</button>
                 </div>

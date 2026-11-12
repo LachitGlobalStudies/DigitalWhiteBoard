@@ -1,17 +1,21 @@
 package com.lachitgs.whiteboard;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
 import android.view.WindowManager;
 import android.webkit.PermissionRequest;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -21,6 +25,22 @@ import androidx.core.view.WindowInsetsControllerCompat;
 
 public class MainActivity extends AppCompatActivity {
     private WebView webView;
+    private ValueCallback<Uri[]> fileUploadCallback;
+
+    // Native Android file picker launcher for <input type="file"> (Images & PDFs)
+    private final ActivityResultLauncher<Intent> filePickerLauncher =
+        registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (fileUploadCallback == null) return;
+            Uri[] results = null;
+            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                Uri dataUri = result.getData().getData();
+                if (dataUri != null) {
+                    results = new Uri[]{dataUri};
+                }
+            }
+            fileUploadCallback.onReceiveValue(results);
+            fileUploadCallback = null;
+        });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             getWindow().getAttributes().layoutInDisplayCutoutMode =
-                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+                WindowManager.LayoutParams.LAYOUT_INDisplay_CUTOUT_MODE_SHORT_EDGES;
         }
         hideSystemBars();
 
@@ -58,9 +78,32 @@ public class MainActivity extends AppCompatActivity {
 
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient() {
+            // Grant WebRTC Camera & Mic permissions
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
                 MainActivity.this.runOnUiThread(() -> request.grant(request.getResources()));
+            }
+
+            // Handle <input type="file"> for Image & PDF imports
+            @Override
+            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
+                if (fileUploadCallback != null) {
+                    fileUploadCallback.onReceiveValue(null);
+                }
+                fileUploadCallback = filePathCallback;
+
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("*/*");
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/*", "application/pdf"});
+
+                try {
+                    filePickerLauncher.launch(Intent.createChooser(intent, "Select Image or PDF"));
+                    return true;
+                } catch (Exception e) {
+                    fileUploadCallback = null;
+                    return false;
+                }
             }
         });
 
