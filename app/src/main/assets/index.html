@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Digital Whiteboard Pro & Classroom</title>
   <!-- External Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
@@ -41,10 +41,11 @@
             <div class="tools-bar">
                 <div class="controls">
                     <button id="shareBoardOnlyBtn" style="display: none;">Share WhiteBoard Only 🖥️</button>
-                    <button id="shareBtn" style="display: none;">Share Screen 🖥️</button>
-                    <button id="youtubeStreamBtn" style="display: none;">Stream YouTube 🎥</button>
-                    <button id="muteAllBtn" style="display: none;">Mute All 🎙️❌</button>
+                  <!--- <button id="shareBtn" style="display: none;">Share Screen 🖥️</button>
+                    <button id="youtubeStreamBtn" style="display: none;">Stream YouTube 🎥</button> -->
+                  <div> <button id="muteAllBtn" style="display: none;">Mute All 🎙️❌</button>
                     <button id="unmuteAllBtn" style="display: none;">Unmute All 🎙️✅</button>
+                  </div>
                     <button id="masterChatBtn" style="display: none;">Chat Board 💬</button>
                 </div>
             </div>
@@ -109,7 +110,7 @@
   </div>
 
   <!-- Whiteboard Top Toolbar -->
-  <div id="toolbar">
+  <div id="toolbar" class="hidden">
     <div class="btn-group">
       <button class="btn" id="btnUndo" title="Undo (Ctrl+Z)">↩ Undo</button>
       <button class="btn" id="btnRedo" title="Redo (Ctrl+Y)">↪ Redo</button>

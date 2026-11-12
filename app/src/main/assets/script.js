@@ -1621,7 +1621,71 @@ window.addEventListener('keydown', (e) => {
     case 'arrowleft': document.getElementById('btnPrevPage').click(); break;
   }
 });
+// ==========================================
+// Double-Tap on Whiteboard Screen to Toggle Toolbar
+// ==========================================
+let lastBoardTapTime = 0;
+let lastBoardTapX = 0;
+let lastBoardTapY = 0;
 
+workspace.addEventListener('touchend', (e) => {
+  // Ignore multi-finger touches
+  if (e.changedTouches.length !== 1) return;
+
+  const touch = e.changedTouches[0];
+  const currentTime = Date.now();
+  const tapInterval = currentTime - lastBoardTapTime;
+  const dist = Math.hypot(touch.clientX - lastBoardTapX, touch.clientY - lastBoardTapY);
+
+  // If tapped twice within 300ms in roughly the same spot (< 30px)
+  if (tapInterval > 40 && tapInterval < 300 && dist < 30) {
+    // Undo any accidental dot created by the tap if in Pen mode
+    if (canvas.isDrawingMode) {
+      const objects = canvas.getObjects();
+      if (objects.length > 0) {
+        const lastObj = objects[objects.length - 1];
+        if (lastObj.width < 5 && lastObj.height < 5) {
+          canvas.remove(lastObj);
+        }
+      }
+    }
+    toggleToolbar();
+    lastBoardTapTime = 0; // reset
+  } else {
+    lastBoardTapTime = currentTime;
+    lastBoardTapX = touch.clientX;
+    lastBoardTapY = touch.clientY;
+  }
+});
+
+// Also support desktop mouse double-click
+workspace.addEventListener('dblclick', () => {
+  toggleToolbar();
+});
+
+// Smooth touch-drag scrolling for toolbar on Android WebView
+const toolbarEl = document.getElementById('toolbar');
+let isToolbarDragging = false;
+let toolbarStartX = 0;
+let toolbarScrollLeft = 0;
+
+toolbarEl.addEventListener('touchstart', (e) => {
+  if (e.touches.length !== 1) return;
+  isToolbarDragging = true;
+  toolbarStartX = e.touches[0].pageX - toolbarEl.offsetLeft;
+  toolbarScrollLeft = toolbarEl.scrollLeft;
+}, { passive: true });
+
+toolbarEl.addEventListener('touchmove', (e) => {
+  if (!isToolbarDragging || e.touches.length !== 1) return;
+  const x = e.touches[0].pageX - toolbarEl.offsetLeft;
+  const walk = (x - toolbarStartX) * 1.2;
+  toolbarEl.scrollLeft = toolbarScrollLeft - walk;
+}, { passive: true });
+
+toolbarEl.addEventListener('touchend', () => {
+  isToolbarDragging = false;
+});
 // Initial Setup
 recordState();
 updatePageUI();
