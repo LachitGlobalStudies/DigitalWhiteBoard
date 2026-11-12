@@ -1,10 +1,16 @@
-const { ipcRenderer } = require('electron');
-let ipcRenderer = null;
+// Safe Electron bridge for Android WebView compatibility
+let ipcRenderer = {
+  on: () => {},
+  send: () => {},
+  removeAllListeners: () => {}
+};
+
 try {
-  const electron = require('electron');
-  ipcRenderer = electron.ipcRenderer;
+  if (typeof require === 'function') {
+    ipcRenderer = require('electron').ipcRenderer;
+  }
 } catch (e) {
-  // Running on Android WebView - ipcRenderer remains null safely
+  console.log('Running in Android WebView mode');
 }
 
 // ==========================================

@@ -13,6 +13,15 @@ body {
   flex-direction: column;
   height: 100vh;
 }
+#workspace {
+  flex: 1;
+  position: relative;
+  background: #2a2d32;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  touch-action: none;
+}
 
 /* Persistent WebRTC Classroom Overlay */
 #classroomContainer {
