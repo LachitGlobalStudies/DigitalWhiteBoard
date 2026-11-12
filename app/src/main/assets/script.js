@@ -640,7 +640,7 @@ const pendingBox = document.getElementById('pendingBox');
 const pendingBadge = document.getElementById('pendingBadge');
 const pendingListItems = document.getElementById('pendingListItems');
 const shareBoardOnlyBtn = document.getElementById('shareBoardOnlyBtn');
-const shareBtn = document.getElementById('shareBtn');
+//const shareBtn = document.getElementById('shareBtn');
 
 let isAudioMuted = false;
 let isVideoStopped = false;
@@ -652,15 +652,14 @@ function showOverlayControls() {
     overlayControls.style.display = 'flex';
     mainDisplayLabel.style.display = 'block';
     
-    // Soayed state check kore button display thik rakha
     if (activeSwappedStudentId) {
       studentCamSwitchBtn.style.display = 'flex';
-      btnSnapStudent.style.display = 'flex'; // <--- যোগ করুন
+      btnSnapStudent.style.display = 'flex';
       camSwitchBtn.style.display = 'none';
     } else {
       camSwitchBtn.style.display = 'flex';
       studentCamSwitchBtn.style.display = 'none';
-      btnSnapStudent.style.display = 'none'; // <--- যোগ করুন
+      btnSnapStudent.style.display = 'none';
     }
   }
   resetOverlayTimeout();
@@ -679,7 +678,7 @@ function resetOverlayTimeout() {
 
 // Touch & Click Event Handlers on Main Area
 let touchTimer = null;
-localVideo.addEventListener("click", function (e) {
+localVideo.addEventListener("click", function () {
   if (touchTimer === null) {
     touchTimer = setTimeout(() => {
       touchTimer = null;
@@ -703,7 +702,7 @@ function toggleMeetingFullscreen() {
   }
 }
 
-localVideo.addEventListener("dblclick", function (e) {
+localVideo.addEventListener("dblclick", function () {
   clearTimeout(touchTimer);
   touchTimer = null;
   toggleMeetingFullscreen();
@@ -808,8 +807,8 @@ document.getElementById('createBtn').onclick = async function () {
   meetingContainer.style.display = 'flex';
 
   shareBoardOnlyBtn.style.display = 'flex';
-  shareBtn.style.display = 'flex';
-  document.getElementById('youtubeStreamBtn').style.display = 'flex';
+  //shareBtn.style.display = 'flex';
+  //document.getElementById('youtubeStreamBtn').style.display = 'flex';
   document.getElementById('muteAllBtn').style.display = 'flex';
   document.getElementById('unmuteAllBtn').style.display = 'flex';
   toggleAudioBtn.style.display = 'flex';
@@ -823,7 +822,6 @@ document.getElementById('createBtn').onclick = async function () {
   resetOverlayTimeout();
 };
 
-
 // ==========================================
 // 3. Real-Time Composite Canvas Sharing Engine
 // ==========================================
@@ -836,11 +834,9 @@ shareBoardOnlyBtn.onclick = function () {
     try {
       if (isScreenSharing) stopScreenShare();
 
-      // ১. Fabric এর Lower ও Upper ক্যানভাস দুটোই রেফারেন্স নেওয়া
       const lowerCanvas = document.getElementById('whiteboard');
       const upperCanvas = workspace.querySelector('.upper-canvas');
 
-      // ২. অফস্ক্রিন কম্পোজিট ক্যানভাস তৈরি
       if (!compositeCanvas) {
         compositeCanvas = document.createElement('canvas');
         compositeCtx = compositeCanvas.getContext('2d');
@@ -849,21 +845,17 @@ shareBoardOnlyBtn.onclick = function () {
       compositeCanvas.width = lowerCanvas.width;
       compositeCanvas.height = lowerCanvas.height;
 
-      // ৩. রিয়েল-টাইম ফ্রেম লুপ (প্রতি ফ্রেমে লোয়ার + লাইভ আপার ড্রয়িং মার্জ করা)
       function renderCompositeFrame() {
         if (!isBoardSharing) return;
 
-        // সাইজ পরিবর্তন হলে সিঙ্ক রাখা
         if (compositeCanvas.width !== lowerCanvas.width || compositeCanvas.height !== lowerCanvas.height) {
           compositeCanvas.width = lowerCanvas.width;
           compositeCanvas.height = lowerCanvas.height;
         }
 
-        // ক্লিয়ার করে প্রথমে লোয়ার ক্যানভাস ড্র করা
         compositeCtx.clearRect(0, 0, compositeCanvas.width, compositeCanvas.height);
         compositeCtx.drawImage(lowerCanvas, 0, 0);
 
-        // ড্রয়িং চলাকালীন আপার ক্যানভাসের লাইভ পেন মুভমেন্ট ড্র করা
         if (upperCanvas) {
           compositeCtx.drawImage(upperCanvas, 0, 0);
         }
@@ -874,11 +866,9 @@ shareBoardOnlyBtn.onclick = function () {
       isBoardSharing = true;
       renderCompositeFrame();
 
-      // ৪. কম্পোজিট ক্যানভাস থেকে 30 FPS লাইভ স্ট্রিম তৈরি
       boardStream = compositeCanvas.captureStream(30);
       const boardVideoTrack = boardStream.getVideoTracks()[0];
 
-      // ৫. সমস্ত কানেক্টেড স্টুডেন্টদের কাছে লাইভ ট্র্যাক প্রতিস্থাপন করা
       for (let userId in peerConnections) {
         const sender = peerConnections[userId].getSenders().find(s => s.track && s.track.kind === 'video');
         if (sender) sender.replaceTrack(boardVideoTrack);
@@ -890,7 +880,6 @@ shareBoardOnlyBtn.onclick = function () {
       this.innerText = "Stop Board Share ❌";
       this.style.background = "#ea4335";
 
-      // সরাসরি ক্লাসরুম হাইড করে বোর্ডে ফিরে যাওয়া
       classroomContainer.classList.remove('active');
       resizeCanvas();
 
@@ -913,7 +902,6 @@ shareBoardOnlyBtn.onclick = function () {
 function stopBoardShare() {
   if (!isBoardSharing) return;
 
-  // রেন্ডার লুপ বন্ধ করা
   if (boardStreamAnimFrame) {
     cancelAnimationFrame(boardStreamAnimFrame);
     boardStreamAnimFrame = null;
@@ -945,21 +933,19 @@ function stopBoardShare() {
   }
 }
 
-// স্টুডেন্টের লাইভ ভিডিও ফ্রেম ক্যাপচার করে হোয়াইটবোর্ডে অবজেক্ট হিসেবে প্লেস করা
+// Capture Student Frame to Whiteboard
 btnSnapStudent.onclick = () => {
   if (!activeSwappedStudentId) {
     alert("Please select a student in the main display first!");
     return;
   }
 
-  // মেইন ডিসপ্লেতে সোয়াপ থাকা লাইভ ভিডিও এলিমেন্ট
   const videoEl = document.getElementById('localVideo');
   if (!videoEl || !videoEl.videoWidth || !videoEl.videoHeight) {
     alert("Student video feed is not active or ready yet.");
     return;
   }
 
-  // অফস্ক্রিন মেমোরি ক্যানভাসে ফুল রেজোলিউশনে ফ্রেম রেন্ডার করা
   const tempCanvas = document.createElement('canvas');
   tempCanvas.width = videoEl.videoWidth;
   tempCanvas.height = videoEl.videoHeight;
@@ -968,7 +954,6 @@ btnSnapStudent.onclick = () => {
   ctx.drawImage(videoEl, 0, 0, tempCanvas.width, tempCanvas.height);
   const snapshotDataUrl = tempCanvas.toDataURL('image/png');
 
-  // Fabric.js হোয়াইটবোর্ডে অ্যাড করা
   fabric.Image.fromURL(snapshotDataUrl, (img) => {
     img.scaleToWidth(Math.min(400, canvas.width * 0.5));
     img.set({
@@ -984,43 +969,42 @@ btnSnapStudent.onclick = () => {
     canvas.renderAll();
     recordState();
 
-    // ক্লাসরুম বন্ধ করে স্বয়ংক্রিয়ভাবে হোয়াইটবোর্ড ক্যানভাসে ফেরত যাওয়া
     classroomContainer.classList.remove('active');
     resizeCanvas();
   });
 };
 
 // Full Screen Share
-shareBtn.onclick = async function () {
-  if (!isScreenSharing) {
-    try {
-      if (isBoardSharing) stopBoardShare();
+// shareBtn.onclick = async function () {
+//   if (!isScreenSharing) {
+//     try {
+//       if (isBoardSharing) stopBoardShare();
 
-      screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-      const videoTrack = screenStream.getVideoTracks()[0];
+//       screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+//       const videoTrack = screenStream.getVideoTracks()[0];
 
-      for (let userId in peerConnections) {
-        const sender = peerConnections[userId].getSenders().find(s => s.track && s.track.kind === 'video');
-        if (sender) sender.replaceTrack(videoTrack);
-      }
+//       for (let userId in peerConnections) {
+//         const sender = peerConnections[userId].getSenders().find(s => s.track && s.track.kind === 'video');
+//         if (sender) sender.replaceTrack(videoTrack);
+//       }
 
-      localVideo.srcObject = screenStream;
-      localVideo.classList.remove('mirror');
-      this.innerText = "Stop Sharing ❌";
-      this.style.background = "#ea4335";
-      isScreenSharing = true;
+//       localVideo.srcObject = screenStream;
+//       localVideo.classList.remove('mirror');
+//       this.innerText = "Stop Sharing ❌";
+//       this.style.background = "#ea4335";
+//       isScreenSharing = true;
 
-      classroomContainer.classList.remove('active');
-      resizeCanvas();
+//       classroomContainer.classList.remove('active');
+//       resizeCanvas();
 
-      videoTrack.onended = stopScreenShare;
-    } catch (error) {
-      console.error("Screen share error:", error);
-    }
-  } else {
-    stopScreenShare();
-  }
-};
+//       videoTrack.onended = stopScreenShare;
+//     } catch (error) {
+//       console.error("Screen share error:", error);
+//     }
+//   } else {
+//     stopScreenShare();
+//   }
+// };
 
 function stopScreenShare() {
   if (!isScreenSharing) return;
@@ -1032,8 +1016,8 @@ function stopScreenShare() {
   localVideo.srcObject = localStream;
   localVideo.classList.add('mirror');
 
-  shareBtn.innerText = "Share Screen 🖥️";
-  shareBtn.style.background = "#007fff";
+  // shareBtn.innerText = "Share Screen 🖥️";
+  // shareBtn.style.background = "#007fff";
 
   if (screenStream) screenStream.getTracks().forEach(track => track.stop());
   isScreenSharing = false;
@@ -1203,13 +1187,11 @@ function swapStudentToMain(studentId) {
   const studentLabel = studentCard.querySelector('.student-label');
   const displayName = studentNames[studentId] || `Student (${studentId.substring(0, 4)})`;
 
-  // Jodi already ei student-i swap thake, tobe reset hobe
   if (activeSwappedStudentId === studentId) {
     resetMainDisplay();
     return;
   }
 
-  // Jodi onno kono student swap thake, age setake reset kore new take swap korbo
   if (activeSwappedStudentId && activeSwappedStudentId !== studentId) {
     resetMainDisplay();
   }
@@ -1229,9 +1211,8 @@ function swapStudentToMain(studentId) {
   if (studentLabel) studentLabel.innerText = "Teacher (You)";
   mainDisplayLabel.innerText = displayName;
 
-  // Student Camera button dekhano ebong Teacher button hide kora
   studentCamSwitchBtn.style.display = 'flex';
-  btnSnapStudent.style.display = 'flex'; // <--- যোগ করুন
+  btnSnapStudent.style.display = 'flex';
   camSwitchBtn.style.display = 'none';
   showOverlayControls();
 }
@@ -1245,7 +1226,6 @@ function resetMainDisplay() {
     const studentLabel = studentCard.querySelector('.student-label');
     const displayName = studentNames[activeSwappedStudentId] || `Student (${activeSwappedStudentId.substring(0, 4)})`;
 
-    // Stream-gulo ke thikbhabe swap-back kora
     const currentMainStream = localVideo.srcObject;
     const currentCardStream = studentVideo.srcObject;
 
@@ -1264,7 +1244,7 @@ function resetMainDisplay() {
   mainDisplayLabel.innerText = "Teacher (You)";
   camSwitchBtn.style.display = 'flex';
   studentCamSwitchBtn.style.display = 'none';
-  btnSnapStudent.style.display = 'none'; // <--- যোগ করুন
+  btnSnapStudent.style.display = 'none';
   showOverlayControls();
 }
 
@@ -1284,29 +1264,26 @@ document.getElementById('muteAllBtn').onclick = () => socket.emit('mute-all-stud
 document.getElementById('unmuteAllBtn').onclick = () => socket.emit('unmute-all-students');
 
 socket.on('student-raised-hand', (data) => {
-            // Handle both object payload { studentId, name } and legacy raw ID string
-            const studentId = typeof data === 'object' ? data.studentId : data;
-            const studentName = (typeof data === 'object' && data.name) 
-                ? data.name 
-                : (studentNames[studentId] || `Student (${studentId.substring(0,4)})`);
+  const studentId = typeof data === 'object' ? data.studentId : data;
+  const studentName = (typeof data === 'object' && data.name) 
+      ? data.name 
+      : (studentNames[studentId] || `Student (${studentId.substring(0,4)})`);
 
-            // Play alert sound and display system notification
-            playHandRaiseChime();
-            showHandRaiseNotification(studentName);
+  playHandRaiseChime();
+  showHandRaiseNotification(studentName);
 
-            const btn = document.getElementById(`mic-${studentId}`);
-            const card = document.getElementById(`card-${studentId}`);
-            const grid = document.getElementById('studentGrid');
-            
-            if (btn && studentMicStatus[studentId] !== 'unmuted') { 
-                btn.innerText = "✋ Hand Raised"; 
-                btn.className = "mic-control-btn hand-raised"; 
-                if (card && grid) {
-                    grid.prepend(card); // Brings the student to the top of the teacher's list
-                }
-            }
-        });
-        
+  const btn = document.getElementById(`mic-${studentId}`);
+  const card = document.getElementById(`card-${studentId}`);
+  const grid = document.getElementById('studentGrid');
+  
+  if (btn && studentMicStatus[studentId] !== 'unmuted') { 
+    btn.innerText = "✋ Hand Raised"; 
+    btn.className = "mic-control-btn hand-raised"; 
+    if (card && grid) {
+      grid.prepend(card);
+    }
+  }
+});
 
 socket.on('single-student-unmuted-ui', (studentId) => {
   studentMicStatus[studentId] = 'unmuted';
@@ -1336,82 +1313,68 @@ socket.on('all-students-unmuted-ui', () => {
   }
 });
 
-             function showStudentNotification(studentName) {
-                if ("Notification" in window && Notification.permission === "granted") {
-                    new Notification("New Student Join Request 🎓", {
-                        body: `${studentName} wants to enter the class.`
-                    });
-                }
-            }
+function showStudentNotification(studentName) {
+  if ("Notification" in window && Notification.permission === "granted") {
+    new Notification("New Student Join Request 🎓", {
+      body: `${studentName} wants to enter the class.`
+    });
+  }
+}
 
-        socket.on('student-join-request', ({ id, name }) => {
-            playJoinChime();
-            showStudentNotification(name);
-        });
-// notification for the raise hand
+socket.on('student-join-request', ({ id, name }) => {
+  playJoinChime();
+  showStudentNotification(name);
+});
 
 function playHandRaiseChime() {
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const now = audioCtx.currentTime;
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(523.25, now);
+    osc.frequency.setValueAtTime(659.25, now + 0.12);
+    osc.frequency.setValueAtTime(783.99, now + 0.24);
+    gain.gain.setValueAtTime(0.25, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + 0.5);
+  } catch (e) {
+    console.warn("Hand raise chime failed:", e);
+  }
+}
 
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
+function showHandRaiseNotification(studentName) {
+  if ("Notification" in window && Notification.permission === "granted") {
+    new Notification("✋ Hand Raised!", {
+      body: `${studentName} raised their hand to ask a question.`,
+      icon: "/favicon.ico"
+    });
+  }
+}
 
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(523.25, now);        // C5
-                osc.frequency.setValueAtTime(659.25, now + 0.12); // E5
-                osc.frequency.setValueAtTime(783.99, now + 0.24); // G5
-
-                gain.gain.setValueAtTime(0.25, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-
-                osc.start(now);
-                osc.stop(now + 0.5);
-            } catch (e) {
-                console.warn("Hand raise chime failed:", e);
-            }
-        }
-
-        function showHandRaiseNotification(studentName) {
-            if ("Notification" in window && Notification.permission === "granted") {
-                new Notification("✋ Hand Raised!", {
-                    body: `${studentName} raised their hand to ask a question.`,
-                    icon: "/favicon.ico"
-                });
-            }
-        }
-
-
-        // --- NOTIFICATION & SOUND FOR STUDENT REQUESTS ---
- function playJoinChime() {
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const now = audioCtx.currentTime;
-
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(740, now);          // F#5
-                osc.frequency.setValueAtTime(880, now + 0.12);     // A5
-
-                gain.gain.setValueAtTime(0.2, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-
-                osc.start(now);
-                osc.stop(now + 0.4);
-            } catch (e) {
-                console.warn("Audio chime failed:", e);
-            }
-        }
-
+function playJoinChime() {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(740, now);
+    osc.frequency.setValueAtTime(880, now + 0.12);
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + 0.4);
+  } catch (e) {
+    console.warn("Audio chime failed:", e);
+  }
+}
 
 // ==========================================
 // 6. Realtime Sync Chat & File Sharing
@@ -1621,49 +1584,68 @@ window.addEventListener('keydown', (e) => {
     case 'arrowleft': document.getElementById('btnPrevPage').click(); break;
   }
 });
+
 // ==========================================
-// Double-Tap on Whiteboard Screen to Toggle Toolbar
+// 8. Reliable Double-Tap Anywhere on Board
 // ==========================================
 let lastBoardTapTime = 0;
 let lastBoardTapX = 0;
 let lastBoardTapY = 0;
 
-workspace.addEventListener('touchend', (e) => {
-  // Ignore multi-finger touches
-  if (e.changedTouches.length !== 1) return;
-
-  const touch = e.changedTouches[0];
+function handleBoardDoubleTapCheck(clientX, clientY) {
   const currentTime = Date.now();
   const tapInterval = currentTime - lastBoardTapTime;
-  const dist = Math.hypot(touch.clientX - lastBoardTapX, touch.clientY - lastBoardTapY);
+  const dist = Math.hypot(clientX - lastBoardTapX, clientY - lastBoardTapY);
 
-  // If tapped twice within 300ms in roughly the same spot (< 30px)
-  if (tapInterval > 40 && tapInterval < 300 && dist < 30) {
-    // Undo any accidental dot created by the tap if in Pen mode
+  // Two taps within 350ms and 45px radius
+  if (tapInterval > 50 && tapInterval < 350 && dist < 45) {
+    // Remove accidental tiny dot created by tapping in Pen/Eraser mode
     if (canvas.isDrawingMode) {
-      const objects = canvas.getObjects();
-      if (objects.length > 0) {
-        const lastObj = objects[objects.length - 1];
-        if (lastObj.width < 5 && lastObj.height < 5) {
-          canvas.remove(lastObj);
+      setTimeout(() => {
+        const objects = canvas.getObjects();
+        if (objects.length > 0) {
+          const lastObj = objects[objects.length - 1];
+          if (lastObj && lastObj.getScaledWidth() < 10 && lastObj.getScaledHeight() < 10) {
+            isHistoryLocked = true;
+            canvas.remove(lastObj);
+            canvas.renderAll();
+            isHistoryLocked = false;
+          }
         }
-      }
+      }, 20);
     }
+
     toggleToolbar();
-    lastBoardTapTime = 0; // reset
+    lastBoardTapTime = 0;
   } else {
     lastBoardTapTime = currentTime;
-    lastBoardTapX = touch.clientX;
-    lastBoardTapY = touch.clientY;
+    lastBoardTapX = clientX;
+    lastBoardTapY = clientY;
+  }
+}
+
+// Hook directly into Fabric.js canvas pointer/touch events
+canvas.on('mouse:down', (opt) => {
+  const evt = opt.e;
+  if (!evt) return;
+
+  if (evt.touches && evt.touches.length === 1) {
+    handleBoardDoubleTapCheck(evt.touches[0].clientX, evt.touches[0].clientY);
+  } else if (evt.clientX !== undefined) {
+    handleBoardDoubleTapCheck(evt.clientX, evt.clientY);
   }
 });
 
-// Also support desktop mouse double-click
-workspace.addEventListener('dblclick', () => {
-  toggleToolbar();
-});
+// Fallback capture listener on #workspace
+workspace.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 1 && e.target.id === 'workspace') {
+    handleBoardDoubleTapCheck(e.touches[0].clientX, e.touches[0].clientY);
+  }
+}, { capture: true, passive: true });
 
-// Smooth touch-drag scrolling for toolbar on Android WebView
+// ==========================================
+// 9. Smooth Touch-Drag Scrolling for Toolbar
+// ==========================================
 const toolbarEl = document.getElementById('toolbar');
 let isToolbarDragging = false;
 let toolbarStartX = 0;
@@ -1679,13 +1661,16 @@ toolbarEl.addEventListener('touchstart', (e) => {
 toolbarEl.addEventListener('touchmove', (e) => {
   if (!isToolbarDragging || e.touches.length !== 1) return;
   const x = e.touches[0].pageX - toolbarEl.offsetLeft;
-  const walk = (x - toolbarStartX) * 1.2;
-  toolbarEl.scrollLeft = toolbarScrollLeft - walk;
+  const walk = x - toolbarStartX;
+  if (Math.abs(walk) > 5) {
+    toolbarEl.scrollLeft = toolbarScrollLeft - (walk * 1.2);
+  }
 }, { passive: true });
 
 toolbarEl.addEventListener('touchend', () => {
   isToolbarDragging = false;
 });
+
 // Initial Setup
 recordState();
 updatePageUI();
