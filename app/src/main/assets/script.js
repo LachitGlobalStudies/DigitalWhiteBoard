@@ -421,7 +421,7 @@ const pageSidebar = document.getElementById('pageSidebar');
 const pageListContainer = document.getElementById('pageListContainer');
 
 function updatePageUI() {
-  document.getElementById('pageIndicator').innerText = `📄 Page ${currentPageIndex + 1} / ${pages.length}`;
+  document.getElementById('pageIndicator').innerText = `📄 ${currentPageIndex + 1} / ${pages.length}`;
   renderSidebarList();
 }
 
