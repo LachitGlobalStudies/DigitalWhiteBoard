@@ -99,7 +99,6 @@ bgColorPicker.addEventListener('input', (e) => {
 const toolbar = document.getElementById('toolbar');
 function toggleToolbar() {
   toolbar.classList.toggle('hidden');
-  setTimeout(resizeCanvas, 220);
 }
 ipcRenderer.on('toggle-toolbar-from-menu', toggleToolbar);
 
