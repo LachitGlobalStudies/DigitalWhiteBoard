@@ -98,7 +98,11 @@ bgColorPicker.addEventListener('input', (e) => {
 
 const toolbar = document.getElementById('toolbar');
 function toggleToolbar() {
-  toolbar.classList.toggle('hidden');
+  if (!toolbar) return;
+  const isHidden = toolbar.classList.toggle('hidden');
+  if (isHidden && shapeDropdown) {
+    shapeDropdown.style.display = 'none';
+  }
 }
 ipcRenderer.on('toggle-toolbar-from-menu', toggleToolbar);
 
@@ -1375,6 +1379,21 @@ function playJoinChime() {
   }
 }
 
+function activatePenTool() {
+  resetTools();
+  const penBtn = document.getElementById('btnPen');
+  if (penBtn) penBtn.classList.add('active');
+  canvas.isDrawingMode = true;
+  canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+  canvas.freeDrawingBrush.color = colorPicker.value;
+  canvas.freeDrawingBrush.width = parseInt(sizePicker.value, 10);
+}
+
+document.getElementById('btnPen').addEventListener('click', activatePenTool);
+
+// Default to Pen immediately on startup
+activatePenTool();
+
 // ==========================================
 // 6. Realtime Sync Chat & File Sharing
 // ==========================================
@@ -1583,7 +1602,92 @@ window.addEventListener('keydown', (e) => {
     case 'arrowleft': document.getElementById('btnPrevPage').click(); break;
   }
 });
+function hideToolbar() {
+  if (toolbar) toolbar.classList.add('hidden');
+  if (shapeDropdown) shapeDropdown.style.display = 'none';
+}
 
+// 1. Select Tool
+document.getElementById('btnSelect').addEventListener('click', function() {
+  resetTools();
+  this.classList.add('active');
+  hideToolbar();
+});
+
+// 2. Pen Tool
+function activatePenTool() {
+  resetTools();
+  const penBtn = document.getElementById('btnPen');
+  if (penBtn) penBtn.classList.add('active');
+  canvas.isDrawingMode = true;
+  canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+  canvas.freeDrawingBrush.color = colorPicker.value;
+  canvas.freeDrawingBrush.width = parseInt(sizePicker.value, 10);
+}
+document.getElementById('btnPen').addEventListener('click', () => {
+  activatePenTool();
+  hideToolbar();
+});
+activatePenTool(); // Default on load
+
+// 3. Eraser Tool
+document.getElementById('btnEraser').addEventListener('click', function() {
+  resetTools();
+  this.classList.add('active');
+  canvas.isDrawingMode = true;
+  canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+  canvas.freeDrawingBrush.color = canvas.backgroundColor || '#ffffff';
+  canvas.freeDrawingBrush.width = parseInt(sizePicker.value, 10) * 4;
+  hideToolbar();
+});
+
+// 4. Shapes Dropdown Toggle (Position dynamically under the Shapes button)
+document.getElementById('btnShapes').addEventListener('click', function(e) {
+  e.stopPropagation();
+  const isOpen = shapeDropdown.style.display === 'flex';
+  if (isOpen) {
+    shapeDropdown.style.display = 'none';
+  } else {
+    const rect = this.getBoundingClientRect();
+    shapeDropdown.style.left = `${Math.max(10, rect.left)}px`;
+    shapeDropdown.style.display = 'flex';
+  }
+});
+
+// 5. After Picking a Shape -> Add Shape, Switch to Select Mode, & Hide Toolbar
+shapeDropdown.querySelectorAll('button').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    const type = e.target.getAttribute('data-shape');
+    let shape;
+    const stroke = colorPicker.value;
+    const strokeWidth = parseInt(sizePicker.value, 10);
+
+    if (type === 'rect') shape = new fabric.Rect({ width: 140, height: 90, fill: 'transparent', stroke, strokeWidth, left: 150, top: 150 });
+    if (type === 'circle') shape = new fabric.Circle({ radius: 55, fill: 'transparent', stroke, strokeWidth, left: 150, top: 150 });
+    if (type === 'triangle') shape = new fabric.Triangle({ width: 120, height: 100, fill: 'transparent', stroke, strokeWidth, left: 150, top: 150 });
+    if (type === 'line') shape = new fabric.Line([50, 50, 250, 50], { stroke, strokeWidth, left: 150, top: 150 });
+
+    if (shape) {
+      resetTools();
+      document.getElementById('btnSelect').classList.add('active');
+      canvas.add(shape);
+      canvas.setActiveObject(shape);
+      canvas.renderAll();
+    }
+    hideToolbar();
+  });
+});
+
+// 6. Auto-hide toolbar after Undo, Redo, Classroom, Browser, Prev/Next Page, or Import
+['btnUndo', 'btnRedo', 'btnToggleClassroom', 'btnOpenBrowser', 'btnPrevPage', 'btnNextPage'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('click', hideToolbar);
+});
+
+['imgUpload', 'pdfUpload'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('change', hideToolbar);
+});
 // ==========================================
 // 8. Reliable Double-Tap Anywhere on Board
 // ==========================================
@@ -1596,15 +1700,13 @@ function handleBoardDoubleTapCheck(clientX, clientY) {
   const tapInterval = currentTime - lastBoardTapTime;
   const dist = Math.hypot(clientX - lastBoardTapX, clientY - lastBoardTapY);
 
-  // Two taps within 350ms and 45px radius
-  if (tapInterval > 50 && tapInterval < 350 && dist < 45) {
-    // Remove accidental tiny dot created by tapping in Pen/Eraser mode
+  if (tapInterval > 40 && tapInterval < 450 && dist < 60) {
     if (canvas.isDrawingMode) {
       setTimeout(() => {
         const objects = canvas.getObjects();
         if (objects.length > 0) {
           const lastObj = objects[objects.length - 1];
-          if (lastObj && lastObj.getScaledWidth() < 10 && lastObj.getScaledHeight() < 10) {
+          if (lastObj && lastObj.getScaledWidth() < 12 && lastObj.getScaledHeight() < 12) {
             isHistoryLocked = true;
             canvas.remove(lastObj);
             canvas.renderAll();
@@ -1613,7 +1715,6 @@ function handleBoardDoubleTapCheck(clientX, clientY) {
         }
       }, 20);
     }
-
     toggleToolbar();
     lastBoardTapTime = 0;
   } else {
@@ -1623,24 +1724,16 @@ function handleBoardDoubleTapCheck(clientX, clientY) {
   }
 }
 
-// Hook directly into Fabric.js canvas pointer/touch events
-canvas.on('mouse:down', (opt) => {
-  const evt = opt.e;
-  if (!evt) return;
-
-  if (evt.touches && evt.touches.length === 1) {
-    handleBoardDoubleTapCheck(evt.touches[0].clientX, evt.touches[0].clientY);
-  } else if (evt.clientX !== undefined) {
-    handleBoardDoubleTapCheck(evt.clientX, evt.clientY);
-  }
-});
-
-// Fallback capture listener on #workspace
 workspace.addEventListener('touchstart', (e) => {
-  if (e.touches.length === 1 && e.target.id === 'workspace') {
+  if (e.touches.length === 1) {
     handleBoardDoubleTapCheck(e.touches[0].clientX, e.touches[0].clientY);
   }
 }, { capture: true, passive: true });
+
+workspace.addEventListener('dblclick', () => {
+  toggleToolbar();
+});
+
 
 // ==========================================
 // 9. Smooth Touch-Drag Scrolling for Toolbar

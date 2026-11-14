@@ -113,60 +113,68 @@
   </div>
 
   <!-- Whiteboard Top Toolbar -->
-    <div id="toolbar" class="hidden">
-      <!-- Undo / Redo -->
-      <div class="btn-group">
-        <button id="btnUndo" class="btn icon-btn" title="Undo (Ctrl+Z)">↩️</button>
-        <button id="btnRedo" class="btn icon-btn" title="Redo (Ctrl+Y)">↪️</button>
-      </div>
+        <div id="toolbar" class="hidden">
+          <!-- Undo / Redo -->
+          <div class="btn-group">
+            <button id="btnUndo" class="btn icon-btn" title="Undo (Ctrl+Z)">↩️</button>
+            <button id="btnRedo" class="btn icon-btn" title="Redo (Ctrl+Y)">↪️</button>
+          </div>
 
-      <!-- Classroom Toggle -->
-      <button id="btnToggleClassroom" class="btn icon-btn" style="background: #238636;" title="Classroom (F2)">📹</button>
+          <!-- Classroom Toggle -->
+          <button id="btnToggleClassroom" class="btn icon-btn" style="background: #238636;" title="Classroom (F2)">📹</button>
 
-      <!-- Drawing Tools -->
-      <div class="btn-group">
-        <button id="btnSelect" class="btn icon-btn active" title="Select (V)">👆</button>
-        <button id="btnPen" class="btn icon-btn" title="Pen (P)">✏️</button>
-        <button id="btnEraser" class="btn icon-btn" title="Eraser (E)">🧽</button>
-        <button id="btnShapes" class="btn icon-btn" title="Shapes">📐</button>
-      </div>
+          <!-- Drawing Tools -->
+          <div class="btn-group">
+            <button id="btnSelect" class="btn icon-btn " title="Select (V)">👆</button>
+            <button id="btnPen" class="btn icon-btn active" title="Pen (P)">✏️</button>
+            <button id="btnEraser" class="btn icon-btn" title="Eraser (E)">🧽</button>
+            <button id="btnShapes" class="btn icon-btn" title="Shapes">📐</button>
+          </div>
+        
 
-      <!-- Colors & Brush Size -->
-      <div class="btn-group">
-        <label class="btn icon-btn" title="Pen Color (C)">
-          🎨
-          <input type="color" id="colorPicker" value="#000000" style="width: 22px; height: 22px; border: none; background: transparent; cursor: pointer;">
-        </label>
-        <label class="btn icon-btn" title="Board Background (Shift+B)">
-          🖼️
-          <input type="color" id="bgColorPicker" value="#ffffff" style="width: 22px; height: 22px; border: none; background: transparent; cursor: pointer;">
-        </label>
-        <label class="btn icon-btn" title="Brush Size ([ / ])" style="gap: 4px;">
-          📏
-          <input type="range" id="sizePicker" min="1" max="50" value="4" style="width: 65px; cursor: pointer;">
-        </label>
-      </div>
+          <!-- Colors & Brush Size -->
+          <div class="btn-group">
+            <label class="btn icon-btn" title="Pen Color (C)">
+              🎨
+              <input type="color" id="colorPicker" value="#000000" style="width: 22px; height: 22px; border: none; background: transparent; cursor: pointer;">
+            </label>
+            <label class="btn icon-btn" title="Board Background (Shift+B)">
+              🖼️
+              <input type="color" id="bgColorPicker" value="#ffffff" style="width: 22px; height: 22px; border: none; background: transparent; cursor: pointer;">
+            </label>
+            <label class="btn icon-btn" title="Brush Size ([ / ])" style="gap: 4px;">
+              📏
+              <input type="range" id="sizePicker" min="1" max="50" value="4" style="width: 65px; cursor: pointer;">
+            </label>
+          </div>
 
-      <!-- Import & Browser -->
-      <div class="btn-group">
-        <label class="btn icon-btn" title="Import Image (Ctrl+I)">
-          🏞️
-          <input type="file" id="imgUpload" accept="image/*" style="display: none;">
-        </label>
-        <label class="btn icon-btn" title="Import PDF (Ctrl+Shift+P)">
-          📑
-          <input type="file" id="pdfUpload" accept="application/pdf" style="display: none;">
-        </label>
-        <button id="btnOpenBrowser" class="btn icon-btn" title="Web Browser (W)">🌐</button>
-      </div>
+          <!-- Import & Browser -->
+          <div class="btn-group">
+            <label class="btn icon-btn" title="Import Image (Ctrl+I)">
+              🏞️
+              <input type="file" id="imgUpload" accept="image/*" style="display: none;">
+            </label>
+            <label class="btn icon-btn" title="Import PDF (Ctrl+Shift+P)">
+              📑
+              <input type="file" id="pdfUpload" accept="application/pdf" style="display: none;">
+            </label>
+            <button id="btnOpenBrowser" class="btn icon-btn" title="Web Browser (W)">🌐</button>
+          </div>
 
-      <!-- Page Navigation -->
-      <div class="btn-group">
-        <button id="btnPrevPage" class="btn icon-btn" title="Previous Page">◀️</button>
-        <button id="pageIndicator" class="btn" title="Page Organizer (O)" style="font-size: 13px; padding: 6px 10px;">📄 1 / 1</button>
-        <button id="btnNextPage" class="btn icon-btn" title="Next Page">▶️</button>
+          <!-- Page Navigation -->
+          <div class="btn-group">
+            <button id="btnPrevPage" class="btn icon-btn" title="Previous Page">◀️</button>
+            <button id="pageIndicator" class="btn" title="Page Organizer (O)" style="font-size: 13px; padding: 6px 10px;">📄 1 / 1</button>
+            <button id="btnNextPage" class="btn icon-btn" title="Next Page">▶️</button>
+          </div>
+        </div>
+
+     <div id="shapeDropdown">
+        <button data-shape="rect">▭ Rectangle</button>
+        <button data-shape="circle">○ Circle</button>
+        <button data-shape="triangle">△ Triangle</button>
+        <button data-shape="line">╱ Line</button>
       </div>
-    </div>
 
   <div id="mainContainer">
     <div id="pageSidebar">
